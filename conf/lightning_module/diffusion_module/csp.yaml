@@ -1,0 +1,13 @@
+_target_: diffclipRL.mattergen.diffusion.diffusion_module.DiffusionModule
+model: mattergen
+corruption: csp
+
+loss_fn:
+  _target_: diffclipRL.mattergen.common.loss.MaterialsLoss
+  reduce: sum
+  include_pos: True
+  include_cell: True
+  include_atomic_numbers: False
+  weights:
+    cell: 1.0
+    pos: 0.1

@@ -1,0 +1,36 @@
+_target_: pytorch_lightning.Trainer
+accelerator: 'gpu'
+devices: ${data_module.device}
+num_nodes: 1
+precision: 32
+max_epochs: ${data_module.max_epochs}
+accumulate_grad_batches: 1
+gradient_clip_val: 0.5
+gradient_clip_algorithm: value
+check_val_every_n_epoch: 1
+
+strategy:
+  _target_: pytorch_lightning.strategies.ddp.DDPStrategy
+  find_unused_parameters: true
+
+logger:
+  _target_: pytorch_lightning.loggers.WandbLogger
+  project: mp_20
+  job_type: train
+  save_dir: 'mp_20'
+  log_model: true
+
+callbacks:
+  - _target_: pytorch_lightning.callbacks.LearningRateMonitor
+    logging_interval: step
+    log_momentum: False
+  - _target_: pytorch_lightning.callbacks.ModelCheckpoint
+    monitor: loss_val
+    mode: min
+    save_top_k: 1
+    save_last: True
+    filename: "best-{epoch}-{loss_val:.2f}"
+    every_n_epochs: 1
+  - _target_: pytorch_lightning.callbacks.TQDMProgressBar
+    process_position: 0
+    refresh_rate: 1
